@@ -6,7 +6,7 @@ import os
 
 st.set_page_config(page_title="Audio Deepfake & AI Voice Detector", page_icon="🎙️")
 st.title("🎙️ Audio Deepfake & AI Voice Detector")
-st.write("Upload an audio file to instantly analyze whether it is authentic human speech or AI-generated deepfake audio.")
+st.write("Upload an audio file or record your voice to instantly analyze whether it is authentic human speech or AI-generated deepfake audio.")
 
 @st.cache_resource
 def load_model():
@@ -15,7 +15,7 @@ def load_model():
 with st.spinner("Loading AI Deepfake Detection Model... Please wait."):
     detector = load_model()
 
-uploaded_file = st.file_uploader("Upload Audio File (WAV, MP3)", type=["wav", "mp3", "m4a"])
+uploaded_file = st.file_uploader("Upload Audio Or Record Your Voice", type=["wav", "mp3", "m4a", "ogg"])
 
 if uploaded_file is not None:
     st.audio(uploaded_file, format="audio/wav")
@@ -24,7 +24,7 @@ if uploaded_file is not None:
     with open("temp_audio.wav", "wb") as f:
         f.write(uploaded_file.getbuffer())
         
-    if st.button("Analyze Audio"):
+    if st.button("Submit"):
         with st.spinner("Analyzing audio features..."):
             try:
                 results = detector("temp_audio.wav")
