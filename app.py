@@ -4,7 +4,7 @@ import librosa
 import soundfile as sf
 import os
 
-st.set_page_title("Audio Deepfake & AI Voice Detector")
+st.set_page_config(page_title="Audio Deepfake & AI Voice Detector", page_icon="🎙️")
 st.title("🎙️ Audio Deepfake & AI Voice Detector")
 st.write("Upload an audio file to instantly analyze whether it is authentic human speech or AI-generated deepfake audio.")
 
