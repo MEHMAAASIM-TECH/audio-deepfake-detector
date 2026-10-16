@@ -1,58 +1,99 @@
 import streamlit as st
 from transformers import pipeline
-import librosa
-import soundfile as sf
 import os
-from moviepy.editor import VideoFileClip
+import tempfile
 
-st.set_page_config(page_title="Audio Deepfake & AI Voice Detector", page_icon="🎙️")
-st.title("🎙️ Audio & Video Deepfake Detector")
-st.write("Upload an audio file or an MP4 video clip to instantly analyze whether the speech is authentic or AI-generated.")
+# 1. Page Configuration
+st.set_page_config(
+    page_title="Audio Deepfake & AI Voice Detector",
+    page_icon="🎙️",
+    layout="centered"
+)
 
+st.title("🎙️ Audio Deepfake & AI Voice Detector")
+st.write(
+    "Upload an audio file (WAV, MP3, M4A, OPUS, OGG, FLAC) or an MP4 video file "
+    "to analyze whether the speech is authentic human speech or AI-generated deepfake audio."
+)
+
+# 2. Load Deepfake Detection Model
 @st.cache_resource
-def load_model():
+def load_detector():
     return pipeline("audio-classification", model="MelodyMachine/Deepfake-audio-detection")
 
-with st.spinner("Loading AI Deepfake Detection Model... Please wait."):
-    detector = load_model()
+with st.spinner("Loading AI Detection Model... Please wait."):
+    detector = load_detector()
 
-# Expanded file types to include mp4
-uploaded_file = st.file_uploader("Upload Audio or Video File", type=["wav", "mp3", "m4a", "mp4"])
+# 3. File Uploader supporting both Audio and Video
+uploaded_file = st.file_uploader(
+    "Upload Audio or Video File",
+    type=["wav", "mp3", "m4a", "opus", "ogg", "flac", "mp4"]
+)
 
 if uploaded_file is not None:
-    file_extension = uploaded_file.name.split('.')[-1].lower()
+    file_extension = uploaded_file.name.split(".")[-1].lower()
     
-    # Save the uploaded file temporarily
-    temp_input_path = f"temp_input.{file_extension}"
-    with open(temp_input_path, "wb") as f:
-        f.write(uploaded_file.getbuffer())
-        
-    audio_path = "temp_audio.wav"
+    # Save uploaded file to a temporary location
+    with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_extension}") as temp_file:
+        temp_file.write(uploaded_file.getbuffer())
+        input_file_path = temp_file.name
+
+    audio_file_path = input_file_path
     
-    # If it's an MP4 video, extract the audio track first
+    # Render preview and extract audio if file is a video (.mp4)
     if file_extension == "mp4":
         st.video(uploaded_file)
-        with st.spinner("Extracting audio from video file..."):
-            try:
-                video_clip = VideoFileClip(temp_input_path)
-                video_clip.audio.write_audiofile(audio_path, logger=None)
+        st.info("Video file detected. Extracting audio track for deepfake analysis...")
+        
+        try:
+            from moviepy.editor import VideoFileClip
+            video_clip = VideoFileClip(input_file_path)
+            
+            # Save extracted audio
+            extracted_audio_path = os.path.splitext(input_file_path)[0] + "_extracted.wav"
+            if video_clip.audio is not None:
+                video_clip.audio.write_audiofile(extracted_audio_path, logger=None)
                 video_clip.close()
-            except Exception as e:
-                st.error(f"Error extracting audio from video: {e}")
+                audio_file_path = extracted_audio_path
+            else:
+                st.error("No audio track found in the uploaded MP4 file.")
+                video_clip.close()
+                audio_file_path = None
+        except Exception as e:
+            st.error(f"Error extracting audio from video: {e}")
+            audio_file_path = None
     else:
         st.audio(uploaded_file)
-        # For standard audio files, copy/rename to temp_audio.wav
-        os.rename(temp_input_path, audio_path)
-        
-    if st.button("Submit"):
-        with st.spinner("Analyzing audio features..."):
+
+    # 4. Analyze Button & Inference Execution
+    if audio_file_path and st.button("Submit / Analyze"):
+        with st.spinner("Analyzing speech patterns and frequencies..."):
             try:
-                results = detector(audio_path)
+                # Perform AI Inference
+                predictions = detector(audio_file_path)
                 st.success("Analysis Complete!")
+                st.subheader("Results:")
                 
-                for res in results:
-                    label = res['label']
-                    score = res['score'] * 100
-                    st.metric(label=f"Detection: {label}", value=f"{score:.2f}%")
+                # Display Results
+                for pred in predictions:
+                    label = pred.get("label", "Unknown")
+                    score = pred.get("score", 0.0) * 100
+                    st.metric(label=f"Class: {label}", value=f"{score:.2f}%")
+                    
             except Exception as e:
-                st.error(f"Error during analysis: {e}")
+                st.error(f"An error occurred during model analysis: {e}")
+                
+            finally:
+                # Clean up temporary extracted audio file if created
+                if file_extension == "mp4" and os.path.exists(audio_file_path):
+                    try:
+                        os.remove(audio_file_path)
+                    except Exception:
+                        pass
+
+    # Clean up original input temporary file
+    if os.path.exists(input_file_path):
+        try:
+            os.remove(input_file_path)
+        except Exception:
+            pass
