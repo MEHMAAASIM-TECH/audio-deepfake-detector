@@ -3,10 +3,11 @@ from transformers import pipeline
 import librosa
 import soundfile as sf
 import os
+from moviepy.editor import VideoFileClip
 
 st.set_page_config(page_title="Audio Deepfake & AI Voice Detector", page_icon="🎙️")
-st.title("🎙️ Audio Deepfake & AI Voice Detector")
-st.write("Upload an audio file or record your voice to instantly analyze whether it is authentic human speech or AI-generated deepfake audio.")
+st.title("🎙️ Audio & Video Deepfake Detector")
+st.write("Upload an audio file or an MP4 video clip to instantly analyze whether the speech is authentic or AI-generated.")
 
 @st.cache_resource
 def load_model():
@@ -15,19 +16,38 @@ def load_model():
 with st.spinner("Loading AI Deepfake Detection Model... Please wait."):
     detector = load_model()
 
-uploaded_file = st.file_uploader("Upload Audio Or Record Your Voice", type=["wav", "mp3", "m4a", "ogg"])
+# Expanded file types to include mp4
+uploaded_file = st.file_uploader("Upload Audio or Video File", type=["wav", "mp3", "m4a", "mp4"])
 
 if uploaded_file is not None:
-    st.audio(uploaded_file, format="audio/wav")
+    file_extension = uploaded_file.name.split('.')[-1].lower()
     
-    # Save temporarily
-    with open("temp_audio.wav", "wb") as f:
+    # Save the uploaded file temporarily
+    temp_input_path = f"temp_input.{file_extension}"
+    with open(temp_input_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
+        
+    audio_path = "temp_audio.wav"
+    
+    # If it's an MP4 video, extract the audio track first
+    if file_extension == "mp4":
+        st.video(uploaded_file)
+        with st.spinner("Extracting audio from video file..."):
+            try:
+                video_clip = VideoFileClip(temp_input_path)
+                video_clip.audio.write_audiofile(audio_path, logger=None)
+                video_clip.close()
+            except Exception as e:
+                st.error(f"Error extracting audio from video: {e}")
+    else:
+        st.audio(uploaded_file)
+        # For standard audio files, copy/rename to temp_audio.wav
+        os.rename(temp_input_path, audio_path)
         
     if st.button("Submit"):
         with st.spinner("Analyzing audio features..."):
             try:
-                results = detector("temp_audio.wav")
+                results = detector(audio_path)
                 st.success("Analysis Complete!")
                 
                 for res in results:
