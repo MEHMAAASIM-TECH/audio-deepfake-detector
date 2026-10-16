@@ -1,6 +1,7 @@
-torch
-transformers
-librosa
-soundfile
 numpy
 streamlit
+transformers
+torch
+librosa
+soundfile
+moviepy
