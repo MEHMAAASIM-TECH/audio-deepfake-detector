@@ -169,24 +169,27 @@ if st.session_state.page == "upload":
 
                     raw_preds = detector(audio_file_path)
                     
-                    # Process and correctly map raw labels
-                    ai_score = 0.0
-                    human_score = 0.0
+                    # Extract raw scores
+                    raw_ai_score = 0.0
+                    raw_human_score = 0.0
                     
                     for p in raw_preds:
                         orig_label = p.get("label", "").lower()
                         score = p.get("score", 0.0)
                         if "fake" in orig_label or "spoof" in orig_label or "ai" in orig_label:
-                            ai_score = score
+                            raw_ai_score = score
                         else:
-                            human_score = score
+                            raw_human_score = score
 
-                    # Fallback if model outputs single score or custom formatting
-                    if ai_score == 0.0 and human_score == 0.0 and len(raw_preds) > 0:
-                        ai_score = raw_preds[0].get("score", 0.0)
-                        human_score = 1.0 - ai_score
+                    if raw_ai_score == 0.0 and raw_human_score == 0.0 and len(raw_preds) > 0:
+                        raw_ai_score = raw_preds[0].get("score", 0.0)
+                        raw_human_score = 1.0 - raw_ai_score
 
-                    # Store formatted predictions sorted by highest confidence first
+                    # INVERTED ASSIGNMENT: Swap raw_ai_score and raw_human_score 
+                    # so that inverted model outputs map correctly to real-world labels
+                    ai_score = raw_human_score
+                    human_score = raw_ai_score
+
                     formatted_preds = [
                         {"label": "AI", "score": ai_score},
                         {"label": "HUMAN", "score": human_score}
