@@ -10,72 +10,78 @@ st.set_page_config(
     layout="wide"
 )
 
-# 2. Advanced Cyber Security UI & Animations
+# 2. Custom Red & White University Branding CSS
 st.markdown("""
     <style>
     .stApp {
-        background: linear-gradient(135deg, #07090f 0%, #030407 100%);
-        color: #f1f5f9;
+        background: linear-gradient(135deg, #0d0f14 0%, #05070a 100%);
+        color: #ffffff;
     }
+    
+    /* Striking Red Sidebar */
     section[data-testid="stSidebar"] {
-        background-color: #0b0f19;
-        border-right: 1px solid #1a2238;
+        background: linear-gradient(180deg, #990000 0%, #660000 100%) !important;
+        color: white !important;
+        border-right: 2px solid #ff334b;
     }
+    section[data-testid="stSidebar"] * {
+        color: white !important;
+    }
+    section[data-testid="stSidebar"] .stInfo {
+        background-color: rgba(255, 255, 255, 0.15) !important;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    }
+
     h1 {
         font-family: 'Inter', sans-serif;
         font-weight: 800;
         letter-spacing: -1px;
+        color: #ffffff;
     }
     
-    /* Glowing Neon Cards */
+    /* Red-bordered Cyber Cards */
     .cyber-card {
-        background: linear-gradient(145deg, rgba(15, 23, 42, 0.8), rgba(10, 15, 30, 0.9));
-        border: 1px solid rgba(255, 51, 75, 0.3);
+        background: rgba(20, 15, 15, 0.85);
+        border: 1px solid rgba(255, 51, 75, 0.4);
         border-radius: 16px;
         padding: 25px;
-        box-shadow: 0 0 25px rgba(255, 51, 75, 0.1);
+        box-shadow: 0 0 20px rgba(255, 51, 75, 0.15);
         backdrop-filter: blur(10px);
         margin-bottom: 20px;
     }
     
-    /* Pulse Animation for Threat Alerts */
-    @keyframes pulse-glow {
-        0% { box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
-        50% { box-shadow: 0 0 25px rgba(239, 68, 68, 0.8); }
-        100% { box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
-    }
+    /* Threat Alert Boxes */
     .alert-box-ai {
-        background: rgba(239, 68, 68, 0.12);
+        background: rgba(239, 68, 68, 0.15);
         border: 2px solid #ef4444;
         padding: 25px;
         border-radius: 14px;
         text-align: center;
-        animation: pulse-glow 2s infinite;
     }
     .alert-box-human {
-        background: rgba(16, 185, 129, 0.12);
+        background: rgba(16, 185, 129, 0.15);
         border: 2px solid #10b981;
         padding: 25px;
         border-radius: 14px;
         text-align: center;
     }
 
-    /* Modern Buttons */
+    /* Red Action Buttons */
     .stButton > button {
         width: 100%;
-        background: linear-gradient(135deg, #ff334b 0%, #b91c2c 100%);
+        background: linear-gradient(135deg, #e60000 0%, #990000 100%);
         color: white;
         font-weight: 700;
         font-size: 1.1rem;
         border-radius: 12px;
         padding: 0.8rem 1.5rem;
-        border: none;
-        box-shadow: 0 4px 20px rgba(255, 51, 75, 0.5);
+        border: 1px solid #ff334b;
+        box-shadow: 0 4px 15px rgba(230, 0, 0, 0.4);
         transition: all 0.3s ease;
     }
     .stButton > button:hover {
-        background: linear-gradient(135deg, #ff4d63 0%, #d32f2f 100%);
-        box-shadow: 0 6px 25px rgba(255, 51, 75, 0.8);
+        background: linear-gradient(135deg, #ff1a1a 0%, #b30000 100%);
+        box-shadow: 0 6px 20px rgba(255, 51, 75, 0.7);
         transform: translateY(-2px);
     }
     </style>
@@ -89,12 +95,11 @@ if "predictions" not in st.session_state:
 if "file_name" not in st.session_state:
     st.session_state.file_name = ""
 
-# Sidebar Control Panel
+# Red Sidebar Control Panel
 with st.sidebar:
-    st.image("https://img.icons8.com/fluency/96/cyber-security.png", width=70)
-    st.markdown("### **Defense Hub**")
+    st.markdown("### 🛡️ **Defense Hub**")
     st.markdown("---")
-    st.info("🟢 **Status:** Active\n\n🤖 **Model:** Wav2Vec2 Audio Classifier\n\n🔒 **Mode:** Deepfake Forensic")
+    st.info("🟢 **Status:** Active\n\n🤖 **Model:** Wav2Vec2 Classifier\n\n🔒 **Mode:** Secure Detection")
     st.markdown("---")
     st.markdown("### **Supported Formats**")
     st.markdown("- `.wav`, `.mp3`, `.m4a`\n- `.opus` (WhatsApp Notes)\n- `.ogg`, `.flac`")
@@ -109,7 +114,7 @@ def load_detector():
 if st.session_state.page == "upload":
     st.markdown("<h1>🎙️ Audio Deepfake & <span style='color: #ff334b;'>AI Voice Detector</span></h1>", unsafe_allow_html=True)
     st.markdown(
-        "<p style='color: #94a3b8; font-size: 1.15rem; margin-bottom: 25px;'>"
+        "<p style='color: #cbd5e1; font-size: 1.15rem; margin-bottom: 25px;'>"
         "Secure neural analysis platform for identifying synthetic voice cloning and AI-generated audio."
         "</p>", 
         unsafe_allow_html=True
@@ -184,14 +189,13 @@ if st.session_state.page == "upload":
 # ==========================================
 elif st.session_state.page == "results":
     st.markdown("<h1>🎙️ Audio Deepfake & <span style='color: #ff334b;'>AI Voice Detector</span></h1>", unsafe_allow_html=True)
-    st.markdown(f"<p style='color: #94a3b8; font-size: 1.05rem;'>Analysis Target: <b>{st.session_state.file_name}</b></p>", unsafe_allow_html=True)
+    st.markdown(f"<p style='color: #cbd5e1; font-size: 1.05rem;'>Analysis Target: <b>{st.session_state.file_name}</b></p>", unsafe_allow_html=True)
     
     st.markdown('<div class="cyber-card">', unsafe_allow_html=True)
     st.subheader("📊 Neural Confidence Breakdown")
     
     predictions = st.session_state.predictions
     
-    # Display Progress Bars + Percentages for visual excitement
     for pred in predictions:
         label = pred.get("label", "Unknown")
         score = pred.get("score", 0.0) * 100
