@@ -185,22 +185,20 @@ elif st.session_state.page == "results":
     
     predictions = st.session_state.predictions
     
-    for pred in predictions:
+    # Display clear, large labels and percentage metrics without bars
+    col1, col2 = st.columns(2)
+    for idx, pred in enumerate(predictions):
         label = pred.get("label", "Unknown")
         score = pred.get("score", 0.0) * 100
         
-        # Large, perfectly visible custom HTML progress bars with bold text
-        st.markdown(f"""
-            <div style="margin-bottom: 25px;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 1.15rem; font-weight: 700;">
-                    <span style="color: #ffffff;">{label}</span>
-                    <span style="color: #da3633;">{score:.2f}%</span>
+        target_col = col1 if idx == 0 else col2
+        with target_col:
+            st.markdown(f"""
+                <div style="background: #21262d; border: 1px solid #30363d; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 15px;">
+                    <div style="font-size: 1.1rem; font-weight: 600; color: #8b949e; margin-bottom: 5px;">{label} Confidence</div>
+                    <div style="font-size: 2rem; font-weight: 800; color: #da3633;">{score:.2f}%</div>
                 </div>
-                <div style="background-color: #21262d; border-radius: 8px; height: 16px; width: 100%; overflow: hidden; border: 1px solid #30363d;">
-                    <div style="background-color: #da3633; width: {score}%; height: 100%; border-radius: 6px;"></div>
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
     
     top_label = predictions[0].get("label", "").lower()
     top_score = predictions[0].get("score", 0.0) * 100
