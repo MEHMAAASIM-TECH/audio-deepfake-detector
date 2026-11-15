@@ -23,10 +23,10 @@ An enterprise-grade, university-branded web application built with Python and St
 ## 🖼️ Application Interface & Workflow
 
 ### 1. File Upload & Video Preview Screen
-![Upload Screen](assets/upload_output.png)
+![Upload Screen](upload_output.png)
 
 ### 2. AI-Generated Voice Detection Result
-![AI Detection Result](assets/ai_output.png)
+![AI Detection Result](ai_output.png)
 
 ### 3. Authentic Human Speech Detection Result
-![Human Detection Result](assets/human_output.png)
+![Human Detection Result](human_output.png)
