@@ -19,3 +19,11 @@ An enterprise-grade, university-branded web application built with Python and St
    ```bash
    git clone [https://github.com/MEHMAAASIM-TECH/audio-deepfake-detector.git](https://github.com/MEHMAAASIM-TECH/audio-deepfake-detector.git)
    cd audio-deepfake-detector
+
+## 📊 Application Outputs & Visual Results
+
+### 1. AI-Generated Voice Detection Example
+![AI Detection Result](ai_output.png)
+
+### 2. Authentic Human Speech Detection Example
+![Human Detection Result](human_output.png)
