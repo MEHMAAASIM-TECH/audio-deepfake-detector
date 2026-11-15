@@ -162,23 +162,36 @@ if st.session_state.page == "upload":
                         temp_audio.close()
                         audio_file_path = temp_audio.name
                         
-                        # Extract audio using system ffmpeg via subprocess
                         cmd = ['ffmpeg', '-y', '-i', temp_input_path, '-vn', '-acodec', 'pcm_s16le', '-ar', '16000', '-ac', '1', audio_file_path]
                         subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     else:
                         audio_file_path = temp_input_path
 
-                    # Run model inference
                     raw_preds = detector(audio_file_path)
                     
-                    formatted_preds = []
+                    # Process and correctly map raw labels
+                    ai_score = 0.0
+                    human_score = 0.0
+                    
                     for p in raw_preds:
                         orig_label = p.get("label", "").lower()
                         score = p.get("score", 0.0)
                         if "fake" in orig_label or "spoof" in orig_label or "ai" in orig_label:
-                            formatted_preds.append({"label": "AI", "score": score})
+                            ai_score = score
                         else:
-                            formatted_preds.append({"label": "HUMAN", "score": score})
+                            human_score = score
+
+                    # Fallback if model outputs single score or custom formatting
+                    if ai_score == 0.0 and human_score == 0.0 and len(raw_preds) > 0:
+                        ai_score = raw_preds[0].get("score", 0.0)
+                        human_score = 1.0 - ai_score
+
+                    # Store formatted predictions sorted by highest confidence first
+                    formatted_preds = [
+                        {"label": "AI", "score": ai_score},
+                        {"label": "HUMAN", "score": human_score}
+                    ]
+                    formatted_preds.sort(key=lambda x: x["score"], reverse=True)
                             
                     st.session_state.predictions = formatted_preds
                     st.session_state.file_name = uploaded_file.name
@@ -219,12 +232,12 @@ elif st.session_state.page == "results":
                 </div>
             """, unsafe_allow_html=True)
     
-    top_label = predictions[0].get("label", "").lower()
+    top_label = predictions[0].get("label", "").upper()
     top_score = predictions[0].get("score", 0.0) * 100
     
     st.markdown("<br>", unsafe_allow_html=True)
     
-    if "ai" in top_label or top_score > 50:
+    if top_label == "AI" and top_score > 50:
         st.markdown(
             f"""<div class="alert-ai">
             <h3 style="color: #ff7b72; margin: 0; font-weight: 600;">🚨 AI-GENERATED AUDIO DETECTED ({top_score:.2f}%)</h3>
