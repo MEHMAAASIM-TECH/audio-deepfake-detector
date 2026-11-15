@@ -2,7 +2,7 @@ import streamlit as st
 from transformers import pipeline
 import os
 import tempfile
-from moviepy.editor import VideoFileClip
+import subprocess
 
 # 1. Page Configuration
 st.set_page_config(
@@ -106,7 +106,7 @@ if st.session_state.page == "upload":
     st.markdown("<h1>🎙️ Audio Deepfake & <span style='color: #da3633;'>AI Voice Detector</span></h1>", unsafe_allow_html=True)
     st.markdown(
         "<p style='color: #8b949e; font-size: 1.05rem; margin-bottom: 25px;'>"
-        "Upload an audio or video file to analyze whether the speech is authentic human speech or AI-generated."
+        "Upload an audio or video file (.mpeg, .mp4, etc.) to analyze speech authenticity."
         "</p>", 
         unsafe_allow_html=True
     )
@@ -125,7 +125,7 @@ if st.session_state.page == "upload":
 
     if uploaded_file is not None:
         file_extension = uploaded_file.name.split(".")[-1].lower()
-        video_extensions = ["mpeg", "mp4", "mov", "avi", "mkv"]
+        video_extensions = ["mpeg", "mp4", "mov", "avi", "mkv", "mpg"]
         
         col_preview, col_action = st.columns([1.2, 1], gap="large")
         
@@ -150,26 +150,23 @@ if st.session_state.page == "upload":
 
         if analyze_clicked:
             audio_file_path = None
-            temp_video_path = None
+            temp_input_path = None
             try:
                 with st.spinner("Extracting audio and analyzing sample..."):
-                    # Handle video vs audio extraction
+                    with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_extension}") as temp_in:
+                        temp_in.write(uploaded_file.getbuffer())
+                        temp_input_path = temp_in.name
+                    
                     if file_extension in video_extensions:
-                        with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_extension}") as temp_vid:
-                            temp_vid.write(uploaded_file.getbuffer())
-                            temp_video_path = temp_vid.name
-                        
-                        # Extract audio using moviepy
-                        video_clip = VideoFileClip(temp_video_path)
                         temp_audio = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
                         temp_audio.close()
                         audio_file_path = temp_audio.name
-                        video_clip.audio.write_audiofile(audio_file_path, logger=None)
-                        video_clip.close()
+                        
+                        # Extract audio using system ffmpeg via subprocess
+                        cmd = ['ffmpeg', '-y', '-i', temp_input_path, '-vn', '-acodec', 'pcm_s16le', '-ar', '16000', '-ac', '1', audio_file_path]
+                        subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     else:
-                        with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_extension}") as temp_audio:
-                            temp_audio.write(uploaded_file.getbuffer())
-                            audio_file_path = temp_audio.name
+                        audio_file_path = temp_input_path
 
                     # Run model inference
                     raw_preds = detector(audio_file_path)
@@ -190,14 +187,9 @@ if st.session_state.page == "upload":
             except Exception as e:
                 st.error(f"Error processing file: {e}")
             finally:
-                if audio_file_path and os.path.exists(audio_file_path):
+                if temp_input_path and os.path.exists(temp_input_path) and temp_input_path != audio_file_path:
                     try:
-                        os.remove(audio_file_path)
-                    except Exception:
-                        pass
-                if temp_video_path and os.path.exists(temp_video_path):
-                    try:
-                        os.remove(temp_video_path)
+                        os.remove(temp_input_path)
                     except Exception:
                         pass
 
