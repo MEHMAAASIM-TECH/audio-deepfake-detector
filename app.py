@@ -2,6 +2,7 @@ import streamlit as st
 from transformers import pipeline
 import os
 import tempfile
+from moviepy.editor import VideoFileClip
 
 # 1. Page Configuration
 st.set_page_config(
@@ -92,7 +93,7 @@ with st.sidebar:
     st.info("🟢 **Engine:** Online\n\n🤖 **Model:** Wav2Vec2\n\n🔒 **Security:** Active")
     st.markdown("---")
     st.markdown("### **Supported Formats**")
-    st.markdown("- `.wav`, `.mp3`, `.m4a`\n- `.opus` (WhatsApp)\n- `.ogg`, `.flac`")
+    st.markdown("- `.wav`, `.mp3`, `.m4a`\n- `.opus` (WhatsApp)\n- `.mpeg`, `.mp4`, `.mov`")
 
 @st.cache_resource
 def load_detector():
@@ -105,7 +106,7 @@ if st.session_state.page == "upload":
     st.markdown("<h1>🎙️ Audio Deepfake & <span style='color: #da3633;'>AI Voice Detector</span></h1>", unsafe_allow_html=True)
     st.markdown(
         "<p style='color: #8b949e; font-size: 1.05rem; margin-bottom: 25px;'>"
-        "Upload an audio file to analyze whether the speech is authentic human speech or AI-generated."
+        "Upload an audio or video file to analyze whether the speech is authentic human speech or AI-generated."
         "</p>", 
         unsafe_allow_html=True
     )
@@ -114,41 +115,63 @@ if st.session_state.page == "upload":
         detector = load_detector()
 
     st.markdown('<div class="clean-card">', unsafe_allow_html=True)
-    st.subheader("📁 Upload Audio File")
+    st.subheader("📁 Upload Audio or Video File")
     uploaded_file = st.file_uploader(
-        "Choose an audio file",
-        type=["wav", "mp3", "m4a", "opus", "ogg", "flac"],
+        "Choose an audio or video file",
+        type=["wav", "mp3", "m4a", "opus", "ogg", "flac", "mpeg", "mp4", "mov"],
         label_visibility="collapsed"
     )
     st.markdown('</div>', unsafe_allow_html=True)
 
     if uploaded_file is not None:
         file_extension = uploaded_file.name.split(".")[-1].lower()
+        video_extensions = ["mpeg", "mp4", "mov", "avi", "mkv"]
         
-        with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_extension}") as temp_file:
-            temp_file.write(uploaded_file.getbuffer())
-            audio_file_path = temp_file.name
-
         col_preview, col_action = st.columns([1.2, 1], gap="large")
         
         with col_preview:
             st.markdown('<div class="clean-card">', unsafe_allow_html=True)
-            st.subheader("🎧 Audio Preview")
-            st.audio(uploaded_file)
+            if file_extension in video_extensions:
+                st.subheader("🎬 Video Preview")
+                st.video(uploaded_file)
+            else:
+                st.subheader("🎧 Audio Preview")
+                st.audio(uploaded_file)
             st.markdown(f"**File:** `{uploaded_file.name}` ({uploaded_file.size / 1024:.1f} KB)")
             st.markdown('</div>', unsafe_allow_html=True)
 
         with col_action:
             st.markdown('<div class="clean-card" style="text-align: center; padding-top: 30px;">', unsafe_allow_html=True)
             st.subheader("🚀 Run Analysis")
-            st.write("Click below to process audio features.")
+            st.write("Click below to process and analyze speech patterns.")
             st.markdown("<br>", unsafe_allow_html=True)
             analyze_clicked = st.button("Start Analysis")
             st.markdown('</div>', unsafe_allow_html=True)
 
         if analyze_clicked:
-            with st.spinner("Analyzing audio sample..."):
-                try:
+            audio_file_path = None
+            temp_video_path = None
+            try:
+                with st.spinner("Extracting audio and analyzing sample..."):
+                    # Handle video vs audio extraction
+                    if file_extension in video_extensions:
+                        with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_extension}") as temp_vid:
+                            temp_vid.write(uploaded_file.getbuffer())
+                            temp_video_path = temp_vid.name
+                        
+                        # Extract audio using moviepy
+                        video_clip = VideoFileClip(temp_video_path)
+                        temp_audio = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
+                        temp_audio.close()
+                        audio_file_path = temp_audio.name
+                        video_clip.audio.write_audiofile(audio_file_path, logger=None)
+                        video_clip.close()
+                    else:
+                        with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_extension}") as temp_audio:
+                            temp_audio.write(uploaded_file.getbuffer())
+                            audio_file_path = temp_audio.name
+
+                    # Run model inference
                     raw_preds = detector(audio_file_path)
                     
                     formatted_preds = []
@@ -164,14 +187,19 @@ if st.session_state.page == "upload":
                     st.session_state.file_name = uploaded_file.name
                     st.session_state.page = "results"
                     st.rerun()
-                except Exception as e:
-                    st.error(f"Error: {e}")
-                finally:
-                    if os.path.exists(audio_file_path):
-                        try:
-                            os.remove(audio_file_path)
-                        except Exception:
-                            pass
+            except Exception as e:
+                st.error(f"Error processing file: {e}")
+            finally:
+                if audio_file_path and os.path.exists(audio_file_path):
+                    try:
+                        os.remove(audio_file_path)
+                    except Exception:
+                        pass
+                if temp_video_path and os.path.exists(temp_video_path):
+                    try:
+                        os.remove(temp_video_path)
+                    except Exception:
+                        pass
 
 # ==========================================
 # SCREEN 2: RESULTS DASHBOARD
@@ -185,7 +213,6 @@ elif st.session_state.page == "results":
     
     predictions = st.session_state.predictions
     
-    # Display clear, large labels and percentage metrics without bars
     col1, col2 = st.columns(2)
     for idx, pred in enumerate(predictions):
         label = pred.get("label", "Unknown")
