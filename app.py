@@ -62,15 +62,19 @@ st.markdown("""
     div[data-testid="stMetric"] {
         background: rgba(15, 22, 38, 0.8);
         border: 1px solid rgba(255, 255, 255, 0.08);
-        padding: 18px;
+        padding: 22px;
         border-radius: 12px;
+        text-align: center;
     }
     div[data-testid="stMetric"] label {
         color: #94a3b8 !important;
+        font-size: 1.1rem !important;
+        font-weight: 600 !important;
     }
     div[data-testid="stMetric"] div[data-testid="stMetricValue"] {
         color: #ff334b !important;
-        font-weight: 700;
+        font-weight: 800 !important;
+        font-size: 2.2rem !important;
     }
     .badge-fake {
         background-color: rgba(239, 68, 68, 0.15);
@@ -93,7 +97,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Initialize Session State for Screen Switching
+# Initialize Session State
 if "page" not in st.session_state:
     st.session_state.page = "upload"
 if "predictions" not in st.session_state:
@@ -168,7 +172,6 @@ if st.session_state.page == "upload":
         if analyze_clicked:
             with st.spinner("Processing spectral harmonics and inference matrix..."):
                 try:
-                    # Save results to session state and switch screen
                     st.session_state.predictions = detector(audio_file_path)
                     st.session_state.file_name = uploaded_file.name
                     st.session_state.page = "results"
@@ -200,10 +203,11 @@ elif st.session_state.page == "results":
         
         if idx == 0:
             with m_col1:
-                st.metric(label="Primary Inference Class", value=f"{label}", delta=f"{score:.2f}% Confidence")
+                # Percentage is now the main bold metric value, label is the title above
+                st.metric(label=f"Classification: {label}", value=f"{score:.2f}%")
         else:
             with m_col2:
-                st.metric(label="Secondary Divergence", value=f"{label}", delta=f"{score:.2f}% Confidence")
+                st.metric(label=f"Classification: {label}", value=f"{score:.2f}%")
     
     top_label = predictions[0].get("label", "").lower()
     top_score = predictions[0].get("score", 0.0) * 100
@@ -228,7 +232,6 @@ elif st.session_state.page == "results":
         
     st.markdown('</div>', unsafe_allow_html=True)
     
-    # Navigation button back to upload screen
     col_back1, col_back2, col_back3 = st.columns([1, 2, 1])
     with col_back2:
         if st.button("🔄 Scan Another Audio File"):
