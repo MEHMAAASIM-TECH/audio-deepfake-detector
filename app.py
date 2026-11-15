@@ -189,9 +189,18 @@ elif st.session_state.page == "results":
         label = pred.get("label", "Unknown")
         score = pred.get("score", 0.0) * 100
         
-        st.markdown(f"**{label} Confidence:** `{score:.2f}%`")
-        st.progress(float(score / 100.0))
-        st.markdown("<br>", unsafe_allow_html=True)
+        # Large, perfectly visible custom HTML progress bars with bold text
+        st.markdown(f"""
+            <div style="margin-bottom: 25px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 1.15rem; font-weight: 700;">
+                    <span style="color: #ffffff;">{label}</span>
+                    <span style="color: #da3633;">{score:.2f}%</span>
+                </div>
+                <div style="background-color: #21262d; border-radius: 8px; height: 16px; width: 100%; overflow: hidden; border: 1px solid #30363d;">
+                    <div style="background-color: #da3633; width: {score}%; height: 100%; border-radius: 6px;"></div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
     
     top_label = predictions[0].get("label", "").lower()
     top_score = predictions[0].get("score", 0.0) * 100
