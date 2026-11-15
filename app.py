@@ -5,8 +5,8 @@ import tempfile
 
 # 1. Page Configuration
 st.set_page_config(
-    page_title="Apex Audio Forensics | Deepfake Detection",
-    page_icon="🛡️",
+    page_title="Audio Deepfake & AI Voice Detector",
+    page_icon="🎙️",
     layout="wide"
 )
 
@@ -123,7 +123,7 @@ def load_detector():
 # SCREEN 1: UPLOAD & PREVIEW SCREEN
 # ==========================================
 if st.session_state.page == "upload":
-    st.markdown("<h1>🛡️ Apex <span>Audio Forensics</span></h1>", unsafe_allow_html=True)
+    st.markdown("<h1>🎙️ Audio Deepfake & <span>AI Voice Detector</span></h1>", unsafe_allow_html=True)
     st.markdown(
         "<p style='color: #94a3b8; font-size: 1.15rem; margin-bottom: 30px;'>"
         "Next-generation enterprise deepfake voice detection platform. Upload an audio sample "
@@ -172,70 +172,4 @@ if st.session_state.page == "upload":
         if analyze_clicked:
             with st.spinner("Processing spectral harmonics and inference matrix..."):
                 try:
-                    st.session_state.predictions = detector(audio_file_path)
-                    st.session_state.file_name = uploaded_file.name
-                    st.session_state.page = "results"
-                    st.rerun()
-                except Exception as e:
-                    st.error(f"Inference pipeline exception encountered: {e}")
-                finally:
-                    if os.path.exists(audio_file_path):
-                        try:
-                            os.remove(audio_file_path)
-                        except Exception:
-                            pass
-
-# ==========================================
-# SCREEN 2: DEDICATED RESULTS REPORT SCREEN
-# ==========================================
-elif st.session_state.page == "results":
-    st.markdown("<h1>📊 Forensic <span>Analysis Report</span></h1>", unsafe_allow_html=True)
-    st.markdown(f"<p style='color: #94a3b8; font-size: 1.05rem;'>Target Analyzed File: <b>{st.session_state.file_name}</b></p>", unsafe_allow_html=True)
-    
-    st.markdown('<div class="glass-card">', unsafe_allow_html=True)
-    
-    predictions = st.session_state.predictions
-    m_col1, m_col2 = st.columns(2)
-    
-    for idx, pred in enumerate(predictions):
-        label = pred.get("label", "Unknown").upper()
-        score = pred.get("score", 0.0) * 100
-        
-        if idx == 0:
-            with m_col1:
-                # Percentage is now the main bold metric value, label is the title above
-                st.metric(label=f"Classification: {label}", value=f"{score:.2f}%")
-        else:
-            with m_col2:
-                st.metric(label=f"Classification: {label}", value=f"{score:.2f}%")
-    
-    top_label = predictions[0].get("label", "").lower()
-    top_score = predictions[0].get("score", 0.0) * 100
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    if "fake" in top_label or "spoof" in top_label or top_score > 50:
-        st.markdown(
-            f"""<div style="background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; padding: 20px; border-radius: 10px; text-align: center;">
-            <span class="badge-fake">🚨 SYNTHETIC AUDIO DETECTED</span>
-            <p style="color: #fca5a5; margin-top: 10px; margin-bottom: 0; font-size: 1.1rem;">This audio sample exhibits characteristics of AI voice cloning or synthetic manipulation.</p>
-            </div>""", 
-            unsafe_allow_html=True
-        )
-    else:
-        st.markdown(
-            f"""<div style="background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; padding: 20px; border-radius: 10px; text-align: center;">
-            <span class="badge-secure">✅ AUTHENTIC HUMAN SPEECH</span>
-            <p style="color: #6ee7b7; margin-top: 10px; margin-bottom: 0; font-size: 1.1rem;">Spectral signatures match natural human vocal patterns.</p>
-            </div>""", 
-            unsafe_allow_html=True
-        )
-        
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    col_back1, col_back2, col_back3 = st.columns([1, 2, 1])
-    with col_back2:
-        if st.button("🔄 Scan Another Audio File"):
-            st.session_state.page = "upload"
-            st.session_state.predictions = None
-            st.session_state.file_name = ""
-            st.rerun()
+                    raw
