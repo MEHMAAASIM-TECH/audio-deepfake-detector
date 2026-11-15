@@ -10,79 +10,69 @@ st.set_page_config(
     layout="wide"
 )
 
-# 2. Custom Red & White University Branding CSS
+# 2. Modern SaaS & University Red Accent Styling
 st.markdown("""
     <style>
+    /* Clean Dark SaaS Background */
     .stApp {
-        background: linear-gradient(135deg, #0d0f14 0%, #05070a 100%);
-        color: #ffffff;
+        background-color: #0b0f17;
+        color: #f8fafc;
     }
     
-    /* Striking Red Sidebar */
+    /* Sleek Neutral Sidebar */
     section[data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #990000 0%, #660000 100%) !important;
-        color: white !important;
-        border-right: 2px solid #ff334b;
+        background-color: #0f172a;
+        border-right: 1px solid #1e293b;
     }
-    section[data-testid="stSidebar"] * {
-        color: white !important;
-    }
-    section[data-testid="stSidebar"] .stInfo {
-        background-color: rgba(255, 255, 255, 0.15) !important;
-        border: 1px solid rgba(255, 255, 255, 0.3) !important;
-    }
-
+    
+    /* Main Headers */
     h1 {
         font-family: 'Inter', sans-serif;
         font-weight: 800;
-        letter-spacing: -1px;
+        letter-spacing: -0.5px;
         color: #ffffff;
     }
     
-    /* Red-bordered Cyber Cards */
-    .cyber-card {
-        background: rgba(20, 15, 15, 0.85);
-        border: 1px solid rgba(255, 51, 75, 0.4);
-        border-radius: 16px;
-        padding: 25px;
-        box-shadow: 0 0 20px rgba(255, 51, 75, 0.15);
-        backdrop-filter: blur(10px);
+    /* Modern Glass Cards */
+    .saas-card {
+        background: #111827;
+        border: 1px solid #1f2937;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         margin-bottom: 20px;
     }
     
-    /* Threat Alert Boxes */
-    .alert-box-ai {
-        background: rgba(239, 68, 68, 0.15);
-        border: 2px solid #ef4444;
-        padding: 25px;
-        border-radius: 14px;
-        text-align: center;
-    }
-    .alert-box-human {
-        background: rgba(16, 185, 129, 0.15);
-        border: 2px solid #10b981;
-        padding: 25px;
-        border-radius: 14px;
-        text-align: center;
-    }
-
-    /* Red Action Buttons */
+    /* Elegant Red Action Buttons */
     .stButton > button {
         width: 100%;
-        background: linear-gradient(135deg, #e60000 0%, #990000 100%);
+        background-color: #dc2626;
         color: white;
-        font-weight: 700;
-        font-size: 1.1rem;
-        border-radius: 12px;
-        padding: 0.8rem 1.5rem;
-        border: 1px solid #ff334b;
-        box-shadow: 0 4px 15px rgba(230, 0, 0, 0.4);
-        transition: all 0.3s ease;
+        font-weight: 600;
+        font-size: 1rem;
+        border-radius: 8px;
+        padding: 0.7rem 1.2rem;
+        border: none;
+        transition: background-color 0.2s ease;
     }
     .stButton > button:hover {
-        background: linear-gradient(135deg, #ff1a1a 0%, #b30000 100%);
-        box-shadow: 0 6px 20px rgba(255, 51, 75, 0.7);
-        transform: translateY(-2px);
+        background-color: #b91c1c;
+    }
+
+    /* Alert Banners */
+    .alert-ai {
+        background-color: rgba(239, 68, 68, 0.1);
+        border: 1px solid #ef4444;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+    }
+    .alert-human {
+        background-color: rgba(16, 185, 129, 0.1);
+        border: 1px solid #10b981;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -95,14 +85,14 @@ if "predictions" not in st.session_state:
 if "file_name" not in st.session_state:
     st.session_state.file_name = ""
 
-# Red Sidebar Control Panel
+# Sidebar Control Panel
 with st.sidebar:
-    st.markdown("### 🛡️ **Defense Hub**")
+    st.markdown("### 🛡️ **Control Panel**")
     st.markdown("---")
-    st.info("🟢 **Status:** Active\n\n🤖 **Model:** Wav2Vec2 Classifier\n\n🔒 **Mode:** Secure Detection")
+    st.info("🟢 **Engine:** Online\n\n🤖 **Model:** Wav2Vec2\n\n🔒 **Security:** Active")
     st.markdown("---")
     st.markdown("### **Supported Formats**")
-    st.markdown("- `.wav`, `.mp3`, `.m4a`\n- `.opus` (WhatsApp Notes)\n- `.ogg`, `.flac`")
+    st.markdown("- `.wav`, `.mp3`, `.m4a`\n- `.opus` (WhatsApp)\n- `.ogg`, `.flac`")
 
 @st.cache_resource
 def load_detector():
@@ -112,21 +102,21 @@ def load_detector():
 # SCREEN 1: UPLOAD DASHBOARD
 # ==========================================
 if st.session_state.page == "upload":
-    st.markdown("<h1>🎙️ Audio Deepfake & <span style='color: #ff334b;'>AI Voice Detector</span></h1>", unsafe_allow_html=True)
+    st.markdown("<h1>🎙️ Audio Deepfake & <span style='color: #ef4444;'>AI Voice Detector</span></h1>", unsafe_allow_html=True)
     st.markdown(
-        "<p style='color: #cbd5e1; font-size: 1.15rem; margin-bottom: 25px;'>"
-        "Secure neural analysis platform for identifying synthetic voice cloning and AI-generated audio."
+        "<p style='color: #94a3b8; font-size: 1.05rem; margin-bottom: 25px;'>"
+        "Upload an audio file to analyze whether the speech is authentic human speech or AI-generated."
         "</p>", 
         unsafe_allow_html=True
     )
 
-    with st.spinner("Initializing Neural Detection Weights..."):
+    with st.spinner("Loading AI Detection Model..."):
         detector = load_detector()
 
-    st.markdown('<div class="cyber-card">', unsafe_allow_html=True)
-    st.subheader("📁 Target Audio Input")
+    st.markdown('<div class="saas-card">', unsafe_allow_html=True)
+    st.subheader("📁 Upload Audio File")
     uploaded_file = st.file_uploader(
-        "Upload your target audio stream",
+        "Choose an audio file",
         type=["wav", "mp3", "m4a", "opus", "ogg", "flac"],
         label_visibility="collapsed"
     )
@@ -142,23 +132,22 @@ if st.session_state.page == "upload":
         col_preview, col_action = st.columns([1.2, 1], gap="large")
         
         with col_preview:
-            st.markdown('<div class="cyber-card">', unsafe_allow_html=True)
-            st.subheader("🎧 Audio Stream Waveform")
+            st.markdown('<div class="saas-card">', unsafe_allow_html=True)
+            st.subheader("🎧 Audio Preview")
             st.audio(uploaded_file)
-            st.markdown(f"**File:** `{uploaded_file.name}`")
-            st.markdown(f"**Type:** `.{file_extension.upper()}` | **Size:** `{uploaded_file.size / 1024:.1f} KB`")
+            st.markdown(f"**File:** `{uploaded_file.name}` ({uploaded_file.size / 1024:.1f} KB)")
             st.markdown('</div>', unsafe_allow_html=True)
 
         with col_action:
-            st.markdown('<div class="cyber-card" style="text-align: center; padding-top: 40px;">', unsafe_allow_html=True)
-            st.subheader("🚀 Execute Neural Scan")
-            st.write("Run deep learning feature analysis on audio frequencies.")
+            st.markdown('<div class="saas-card" style="text-align: center; padding-top: 30px;">', unsafe_allow_html=True)
+            st.subheader("🚀 Run Analysis")
+            st.write("Click below to process audio features.")
             st.markdown("<br>", unsafe_allow_html=True)
-            analyze_clicked = st.button("Start Deepfake Analysis")
+            analyze_clicked = st.button("Start Analysis")
             st.markdown('</div>', unsafe_allow_html=True)
 
         if analyze_clicked:
-            with st.spinner("Analyzing spectral harmonics and neural weights..."):
+            with st.spinner("Analyzing audio sample..."):
                 try:
                     raw_preds = detector(audio_file_path)
                     
@@ -176,7 +165,7 @@ if st.session_state.page == "upload":
                     st.session_state.page = "results"
                     st.rerun()
                 except Exception as e:
-                    st.error(f"Execution error: {e}")
+                    st.error(f"Error: {e}")
                 finally:
                     if os.path.exists(audio_file_path):
                         try:
@@ -188,11 +177,11 @@ if st.session_state.page == "upload":
 # SCREEN 2: RESULTS DASHBOARD
 # ==========================================
 elif st.session_state.page == "results":
-    st.markdown("<h1>🎙️ Audio Deepfake & <span style='color: #ff334b;'>AI Voice Detector</span></h1>", unsafe_allow_html=True)
-    st.markdown(f"<p style='color: #cbd5e1; font-size: 1.05rem;'>Analysis Target: <b>{st.session_state.file_name}</b></p>", unsafe_allow_html=True)
+    st.markdown("<h1>🎙️ Audio Deepfake & <span style='color: #ef4444;'>AI Voice Detector</span></h1>", unsafe_allow_html=True)
+    st.markdown(f"<p style='color: #94a3b8; font-size: 1rem;'>Analyzed File: <b>{st.session_state.file_name}</b></p>", unsafe_allow_html=True)
     
-    st.markdown('<div class="cyber-card">', unsafe_allow_html=True)
-    st.subheader("📊 Neural Confidence Breakdown")
+    st.markdown('<div class="saas-card">', unsafe_allow_html=True)
+    st.subheader("📊 Confidence Breakdown")
     
     predictions = st.session_state.predictions
     
@@ -200,7 +189,7 @@ elif st.session_state.page == "results":
         label = pred.get("label", "Unknown")
         score = pred.get("score", 0.0) * 100
         
-        st.markdown(f"**{label} Confidence Score:** `{score:.2f}%`")
+        st.markdown(f"**{label} Confidence:** `{score:.2f}%`")
         st.progress(float(score / 100.0))
         st.markdown("<br>", unsafe_allow_html=True)
     
@@ -211,17 +200,17 @@ elif st.session_state.page == "results":
     
     if "ai" in top_label or top_score > 50:
         st.markdown(
-            f"""<div class="alert-box-ai">
-            <h2 style="color: #f87171; margin: 0; font-weight: 800;">🚨 SYNTHETIC AI VOICE DETECTED ({top_score:.2f}%)</h2>
-            <p style="color: #fca5a5; margin-top: 10px; margin-bottom: 0; font-size: 1.1rem;">Warning: Spectral analysis confirms artificial voice cloning or deepfake generation artifacts.</p>
+            f"""<div class="alert-ai">
+            <h3 style="color: #f87171; margin: 0; font-weight: 700;">🚨 AI-GENERATED AUDIO DETECTED ({top_score:.2f}%)</h3>
+            <p style="color: #fca5a5; margin-top: 8px; margin-bottom: 0;">This audio sample exhibits characteristics of synthetic manipulation.</p>
             </div>""", 
             unsafe_allow_html=True
         )
     else:
         st.markdown(
-            f"""<div class="alert-box-human">
-            <h2 style="color: #34d399; margin: 0; font-weight: 800;">✅ AUTHENTIC HUMAN SPEECH ({top_score:.2f}%)</h2>
-            <p style="color: #6ee7b7; margin-top: 10px; margin-bottom: 0; font-size: 1.1rem;">Verified: Audio frequency bands match organic human vocal patterns.</p>
+            f"""<div class="alert-human">
+            <h3 style="color: #34d399; margin: 0; font-weight: 700;">✅ AUTHENTIC HUMAN SPEECH ({top_score:.2f}%)</h3>
+            <p style="color: #6ee7b7; margin-top: 8px; margin-bottom: 0;">Spectral signatures match organic human vocal patterns.</p>
             </div>""", 
             unsafe_allow_html=True
         )
@@ -230,7 +219,7 @@ elif st.session_state.page == "results":
     
     col_back1, col_back2, col_back3 = st.columns([1, 2, 1])
     with col_back2:
-        if st.button("🔄 Analyze Another Audio File"):
+        if st.button("🔄 Analyze Another File"):
             st.session_state.page = "upload"
             st.session_state.predictions = None
             st.session_state.file_name = ""
