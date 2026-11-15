@@ -4,4 +4,4 @@ transformers
 torch
 librosa
 soundfile
-moviepy
+
